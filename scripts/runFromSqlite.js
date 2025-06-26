@@ -28,7 +28,7 @@ db.all(query, [], (err, rows) => {
 
   // Run Newman
   newman.run({
-    collection: './postman/YourCollection.postman_collection.json',
+    collection: './postman/collections/24490171-9fd0a8bf-a7ec-40c6-8ee0-f7dd700a1d7a.json',
     iterationData: outputPath,
     reporters: ['cli', 'json'],
     reporter: {
