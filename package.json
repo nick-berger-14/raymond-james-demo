@@ -1,0 +1,13 @@
+{
+  "name": "postman-sqlite-integration",
+  "version": "1.0.0",
+  "description": "Run Postman collection using data fetched from a SQLite database",
+  "main": "scripts/runFromSqlite.js",
+  "scripts": {
+    "test:sqlite": "node scripts/runFromSqlite.js"
+  },
+  "dependencies": {
+    "newman": "^6.0.0",
+    "sqlite3": "^5.1.6"
+  }
+}
