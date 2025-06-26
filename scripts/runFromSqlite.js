@@ -12,7 +12,7 @@ const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READONLY, (err) => {
   console.log('✅ Connected to SQLite database.');
 });
 
-const query = `SELECT customerEmail AS customerEmail, amount FROM deposits LIMIT 10`;
+const query = `SELECT customerEmail, depositAmount FROM deposits LIMIT 10`;
 
 db.all(query, [], (err, rows) => {
   if (err) {
