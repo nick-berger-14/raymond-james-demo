@@ -1,0 +1,690 @@
+{
+	"info": {
+		"_postman_id": "24490171-9fd0a8bf-a7ec-40c6-8ee0-f7dd700a1d7a",
+		"name": "Customer Account Lifecycle - Git",
+		"description": "This collection checks if a customer exists, creates them if not, then opens a new account for them and performs a deposit. It uses collection variables to maintain context (e.g., customerId, accountId) and demonstrates conditional control flow using Postman scripts. Each request includes example responses for success and failure scenarios.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Check if Customer Exists",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "157f4eb4-eb1d-4791-9a49-399719a2ca4d",
+						"exec": [
+							"",
+							"const res = pm.response.json();",
+							"if (pm.response.code === 200) {",
+							"    pm.collectionVariables.set(\"customerId\", res.id);",
+							"    postman.setNextRequest(\"Create Account\");",
+							"} else {",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "089b43b2-df82-4d42-b791-a8cf9c313887",
+						"exec": [
+							"let inputValue;",
+							"",
+							"const allowedValues = [",
+							"  'charlie.king@example.com',",
+							"  'diana.lee@example.com',",
+							"  'fiona.adams@example.com',",
+							"  'julie.chen@example.com'",
+							"];",
+							"",
+							"try {",
+							"  inputValue = pm.iterationData.get(\"customerEmail\");",
+							"",
+							"  if (typeof inputValue !== 'string') {",
+							"    throw new Error('Iteration data missing or not a string.');",
+							"  }",
+							"} catch (err) {",
+							"  console.warn(`Iteration data not available. Falling back to collection variable. Reason: ${err.message}`);",
+							"  inputValue = pm.collectionVariables.get(\"customerEmail\");",
+							"}",
+							"",
+							"try {",
+							"  if (typeof inputValue !== 'string') {",
+							"    throw new Error('Final inputValue is not a string.');",
+							"  }",
+							"",
+							"  const isMatch = allowedValues.some(val => val.toLowerCase() === inputValue.toLowerCase());",
+							"  console.log(`Matching \"${inputValue}\"?`, isMatch);",
+							"",
+							"  pm.collectionVariables.set('req1MockCode', isMatch ? 200 : 404);",
+							"} catch (err) {",
+							"  console.error(`Error checking value: ${err.message}`);",
+							"  pm.collectionVariables.set('req1MockCode', 500); // Optional fallback",
+							"}",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"id": "24490171-783908cd-97c1-40d1-92b7-53158cbbd198",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "x-mock-response-code",
+						"value": "{{req1MockCode}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/customers?email={{customerEmail}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"customers"
+					],
+					"query": [
+						{
+							"key": "email",
+							"value": "{{customerEmail}}"
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"id": "24490171-1aea5414-cb13-46ed-8759-b8ca2be6c904",
+					"name": "200 OK Customer Found",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/customers?email={{customerEmail}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"customers"
+							],
+							"query": [
+								{
+									"key": "email",
+									"value": "{{customerEmail}}"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"description": "",
+							"type": "text"
+						}
+					],
+					"cookie": [],
+					"responseTime": null,
+					"body": "{\n  \"id\": \"{{$randomUUID}}\",\n  \"email\": \"{{$queryParams 'email'}}\",\n  \"createdAt\": \"2024-11-18T10:22:30Z\",\n  \"status\": \"active\",\n  \"phone\": \"+1-555-123-4567\",\n  \"accounts\": [\n    {\n      \"accountId\": \"acct_001\",\n      \"type\": \"checking\",\n      \"balance\": 1250.75,\n      \"currency\": \"USD\",\n      \"status\": \"open\",\n      \"createdAt\": \"2024-11-19T14:05:22Z\"\n    },\n    {\n      \"accountId\": \"acct_002\",\n      \"type\": \"savings\",\n      \"balance\": 8050.00,\n      \"currency\": \"USD\",\n      \"status\": \"open\",\n      \"createdAt\": \"2024-12-01T09:13:00Z\"\n    }\n  ]\n}\n"
+				},
+				{
+					"id": "24490171-a7ea2f5b-1020-4be6-8ce1-b6cdc31edc6e",
+					"name": "404 Not Found",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/customers?email={{customerEmail}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"customers"
+							],
+							"query": [
+								{
+									"key": "email",
+									"value": "{{customerEmail}}"
+								}
+							]
+						}
+					},
+					"status": "Not Found",
+					"code": 404,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"description": "",
+							"type": "text"
+						}
+					],
+					"cookie": [
+						{
+							"expires": "Invalid Date"
+						}
+					],
+					"responseTime": null,
+					"body": "{\n  \"error\": {\n    \"code\": 404,\n    \"message\": \"Customer with email '{{$queryParams 'email'}}' not found.\"\n  }\n}"
+				}
+			]
+		},
+		{
+			"name": "Create Customer",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "94db59ba-e6f3-4a9c-b719-4a0b1d594bad",
+						"exec": [
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "c7794b1f-25a9-4700-959a-5c3bce289c59",
+						"exec": [
+							"",
+							"if (pm.response.code === 201) {",
+							"    const res = pm.response.json();",
+							"    pm.collectionVariables.set(\"customerId\", res.id);",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"id": "24490171-7a76c0e0-193b-4dcd-8788-2eca8fa3d363",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"{{customerEmail}}\",\n  \"name\": \"Jane Doe\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/customers",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"customers"
+					]
+				}
+			},
+			"response": [
+				{
+					"id": "24490171-ed347b42-be47-432f-ab0f-634e70a36725",
+					"name": "201 Customer Created",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{customerEmail}}\",\n  \"name\": \"Jane Doe\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/customers",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"customers"
+							]
+						}
+					},
+					"status": "Created",
+					"code": 201,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"description": "",
+							"type": "text"
+						}
+					],
+					"cookie": [
+						{
+							"expires": "Invalid Date"
+						}
+					],
+					"responseTime": null,
+					"body": "{\n    \"id\": \"{{$randomUUID}}\",\n    \"email\": \"{{$body 'email'}}\"\n}"
+				},
+				{
+					"id": "24490171-f958a742-c982-48ba-968d-cddcea5c083d",
+					"name": "409 Customer Exists",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{customerEmail}}\",\n  \"name\": \"Jane Doe\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/customers",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"customers"
+							]
+						}
+					},
+					"status": "Conflict",
+					"code": 409,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"description": "",
+							"type": "text"
+						}
+					],
+					"cookie": [
+						{
+							"expires": "Invalid Date"
+						}
+					],
+					"responseTime": null,
+					"body": "{\n    \"error\": {\n        \"code\": 409,\n        \"message\": \"Customer already exists.\"\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "Create Account",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"const res = pm.response.json();",
+							"if (pm.response.code === 201) {",
+							"    pm.collectionVariables.set(\"accountId\", res.id);",
+							"}"
+						],
+						"id": "81ac8ed1-c0d7-4479-b74e-a8b3d421d7e6"
+					}
+				}
+			],
+			"id": "24490171-a3f62f49-6812-457b-a0cd-e68b75be369c",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"customerId\": \"{{customerId}}\",\n  \"type\": \"checking\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/accounts",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"accounts"
+					]
+				}
+			},
+			"response": [
+				{
+					"id": "24490171-3adc5dd3-f52e-4d37-84cf-a1dbdada1a9a",
+					"name": "201 Account Created",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customerId\": \"{{customerId}}\",\n  \"type\": \"checking\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/accounts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"accounts"
+							]
+						}
+					},
+					"status": "Created",
+					"code": 201,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"description": "",
+							"type": "text"
+						}
+					],
+					"cookie": [],
+					"responseTime": null,
+					"body": "{\n    \"id\": \"{{$randomBankAccount}}\",\n    \"customerId\": \"{{$body 'customerId'}}\",\n    \"type\": \"checking\"\n}"
+				},
+				{
+					"id": "24490171-28006a64-4594-45cb-bf4c-323fd778ffa2",
+					"name": "400 Bad Request",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customerId\": \"{{customerId}}\",\n  \"type\": \"checking\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/accounts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"accounts"
+							]
+						}
+					},
+					"status": "Bad Request",
+					"code": 400,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"description": "",
+							"type": "text"
+						}
+					],
+					"cookie": [
+						{
+							"expires": "Invalid Date"
+						}
+					],
+					"responseTime": null,
+					"body": "{\n    \"error\": {\n        \"code\": 400,\n        \"message\": \"Customer ID is required.\"\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "Deposit to Account",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "3df37ce2-caee-4165-b29e-7aba68993550",
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"id": "24490171-57ef362a-c4fc-49ec-bc53-3496a24f3d03",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "x-mock-response-id",
+						"value": "{{req4MockId}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"amount\": \"{{depositAmount}}\",\n  \"currency\": \"USD\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/accounts/{{accountId}}/deposit",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"accounts",
+						"{{accountId}}",
+						"deposit"
+					]
+				}
+			},
+			"response": [
+				{
+					"id": "24490171-40d937df-24fa-4d41-8a6d-cc07ef2ae08b",
+					"name": "200 Deposit Successful",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"amount\": \"{{despositAmount}}\",\n  \"currency\": \"USD\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/accounts/{{accountId}}/deposit",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"accounts",
+								"{{accountId}}",
+								"deposit"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"description": "",
+							"type": "text"
+						}
+					],
+					"cookie": [
+						{
+							"expires": "Invalid Date"
+						}
+					],
+					"responseTime": null,
+					"body": "{\n    \"accountId\": \"{{$pathSegments '1'}}\",\n    \"balance\": \"{{$body 'amount'}}\"\n}"
+				},
+				{
+					"id": "24490171-e92806f7-fc06-4814-808d-449cca01f834",
+					"name": "400 Bad Request",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"amount\": \"\",\n  \"currency\": \"USD\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/accounts/{{accountId}}/deposit",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"accounts",
+								"{{accountId}}",
+								"deposit"
+							]
+						}
+					},
+					"status": "Bad Request",
+					"code": 400,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"description": "",
+							"type": "text"
+						}
+					],
+					"cookie": [
+						{
+							"expires": "Invalid Date"
+						}
+					],
+					"responseTime": null,
+					"body": "{\n    \"error\": {\n        \"code\": 400,\n        \"message\": \"Missing deposit details\"\n    }\n}"
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "3b8f7d36-fb02-4393-82d4-d49035ac09a3",
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "8b3ef407-84f2-4c55-9f93-9756cc2241b5",
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://5863e69b-8536-4452-a185-cea176eb5960.mock.pstmn.io"
+		},
+		{
+			"key": "customerEmail",
+			"value": ""
+		},
+		{
+			"key": "depositAmount",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "customerId",
+			"value": ""
+		},
+		{
+			"key": "accountId",
+			"value": ""
+		},
+		{
+			"key": "req1MockCode",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "req4MockId",
+			"value": "24490171-40d937df-24fa-4d41-8a6d-cc07ef2ae08b",
+			"type": "string"
+		}
+	]
+}
